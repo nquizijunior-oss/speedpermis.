@@ -6,7 +6,7 @@ import { Card, CardHeader } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ResultBadge } from '../components/ui/ResultBadge';
 import { toneForResultat } from '../components/ui/badgeTone';
-import { CategoryBadge } from '../components/ui/CategoryBadge';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 import { useAppContext } from '../hooks/useAppContext';
 import { examensParCandidat } from '../data/examens';
 import { documentsCandidat } from '../data/documents';
@@ -108,19 +108,23 @@ export function CandidatDetail() {
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-2xl font-bold tracking-tight text-ink-900">{nomComplet}</h2>
-                <span className="inline-flex items-center gap-2 text-sm font-semibold text-ink-700">Catégorie <CategoryBadge category={candidat.categorie} /></span>
+                <h2 className="text-2xl font-bold tracking-tight text-ink-900">
+                  <InlineEditableField value={candidat.prenom} onSave={(next) => updateCandidat(candidat.id, { prenom: next })} className="inline-block" />
+                  {' '}
+                  <InlineEditableField value={candidat.nom} onSave={(next) => updateCandidat(candidat.id, { nom: next })} className="inline-block" />
+                </h2>
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-ink-700">Catégorie <InlineEditableField value={candidat.categorie} onSave={(next) => updateCandidat(candidat.id, { categorie: next as typeof candidat.categorie })} type="select" options={['A', 'A2', 'B', 'BE', 'C']} className="inline-block text-sm font-semibold text-ink-700" /></span>
               </div>
               <p className="mt-2 text-sm text-ink-700">
-                {candidat.genre === 'F' ? 'Née' : 'Né'} le <span className="date-value">{candidat.dateNaissance}</span> ({candidat.age} ans)
+                {candidat.genre === 'F' ? 'Née' : 'Né'} le <InlineEditableField value={candidat.dateNaissance} onSave={(next) => updateCandidat(candidat.id, { dateNaissance: next })} className="date-value inline-block" /> ({candidat.age} ans)
               </p>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-700">
                 <PhoneIcon className="h-4 w-4 text-ink-400" aria-hidden="true" />
-                {candidat.telephone}
+                <InlineEditableField value={candidat.telephone} onSave={(next) => updateCandidat(candidat.id, { telephone: next })} className="inline-block" />
               </p>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-700">
                 <MailIcon className="h-4 w-4 text-ink-400" aria-hidden="true" />
-                {candidat.email}
+                <InlineEditableField value={candidat.email} onSave={(next) => updateCandidat(candidat.id, { email: next })} className="inline-block" />
               </p>
             </div>
           </div>
@@ -134,7 +138,7 @@ export function CandidatDetail() {
             ].map((row) => (
               <div key={row.t}>
                 <dt className="text-sm text-ink-500">{row.t}</dt>
-                <dd className="mt-0.5 font-semibold tabular-nums text-ink-900">{row.v}</dd>
+                <dd className="mt-0.5 font-semibold tabular-nums text-ink-900">{row.t === 'Date d’inscription' ? <InlineEditableField value={candidat.dateInscription} onSave={(next) => updateCandidat(candidat.id, { dateInscription: next })} className="inline-block" /> : row.v}</dd>
               </div>
             ))}
           </dl>
@@ -167,16 +171,48 @@ export function CandidatDetail() {
             <CardHeader title="Informations du dossier" description="Données transmises au service national" />
             <dl className="grid grid-cols-1 gap-x-10 gap-y-5 p-6 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { t: 'Statut du dossier', v: candidat.statut },
-                { t: 'Code de la route', v: candidat.codeObtenu ? 'Obtenu' : 'Non obtenu' },
+                {
+                  t: 'Statut du dossier',
+                  v: candidat.statut,
+                  onSave: (next: string) => updateCandidat(candidat.id, { statut: next as typeof candidat.statut }),
+                  type: 'select' as const,
+                  options: ['Actif', 'En attente', 'Terminé', 'Suspendu'],
+                },
+                {
+                  t: 'Code de la route',
+                  v: candidat.codeObtenu ? 'Obtenu' : 'Non obtenu',
+                  onSave: (next: string) => updateCandidat(candidat.id, { codeObtenu: next === 'Obtenu' }),
+                  type: 'select' as const,
+                  options: ['Obtenu', 'Non obtenu'],
+                },
                 { t: 'Heures effectuées', v: `${candidat.heuresEffectuees} h / ${candidat.heuresPrevues} h` },
-                { t: 'Ville de rattachement', v: candidat.ville },
-                { t: 'Solde restant dû', v: candidat.soldeDu === 0 ? 'Aucun' : `${candidat.soldeDu} €` },
+                {
+                  t: 'Ville de rattachement',
+                  v: candidat.ville,
+                  onSave: (next: string) => updateCandidat(candidat.id, { ville: next }),
+                },
+                {
+                  t: 'Solde restant dû',
+                  v: candidat.soldeDu === 0 ? 'Aucun' : `${candidat.soldeDu} €`,
+                  onSave: (next: string) => updateCandidat(candidat.id, { soldeDu: Number(next.replace(/[^0-9.-]/g, '')) || 0 }),
+                },
                 { t: 'Type de formation', v: 'Formation traditionnelle' },
               ].map((row) => (
                 <div key={row.t}>
                   <dt className="text-sm text-ink-500">{row.t}</dt>
-                  <dd className="mt-1 font-semibold text-ink-900">{row.v}</dd>
+                  <dd className="mt-1 font-semibold text-ink-900">
+                    {row.onSave ? (
+                      <InlineEditableField
+                        value={row.v}
+                        onSave={row.onSave}
+                        type={row.type ?? 'text'}
+                        options={row.options ?? []}
+                        className="inline-block"
+                      />
+                    ) : (
+                      row.v
+                    )}
+                  </dd>
                 </div>
               ))}
             </dl>

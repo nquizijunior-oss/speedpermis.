@@ -3,8 +3,7 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { CheckIcon, DownloadIcon, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card, CardHeader } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { toneForResultat } from '../components/ui/badgeTone';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 import { NewInvoiceModal } from '../components/modals/NewInvoiceModal';
 import { Facture, StatutFacture } from '../types';
 import { useAppContext } from '../hooks/useAppContext';
@@ -268,12 +267,42 @@ export function Facturation() {
               {liste.map((f) => (
                 <tr key={f.id} className="transition-colors duration-150 hover:bg-canvas">
                   <td className="px-6 py-4 font-semibold tabular-nums text-ink-900">{f.numero}</td>
-                  <td className="px-6 py-4 text-ink-700">{f.candidat}</td>
-                  <td className="px-6 py-4 text-ink-700">{f.libelle}</td>
-                  <td className="px-6 py-4 tabular-nums text-ink-700"><span className="date-value">{f.echeance}</span></td>
-                  <td className="px-6 py-4 font-semibold tabular-nums text-ink-900">{f.montant} €</td>
+                  <td className="px-6 py-4 text-ink-700">
+                    <InlineEditableField
+                      value={f.candidat}
+                      onSave={(next) => updateFacture(f.id, { candidat: next })}
+                      className="inline-block text-ink-700"
+                    />
+                  </td>
+                  <td className="px-6 py-4 text-ink-700">
+                    <InlineEditableField
+                      value={f.libelle}
+                      onSave={(next) => updateFacture(f.id, { libelle: next })}
+                      className="inline-block text-ink-700"
+                    />
+                  </td>
+                  <td className="px-6 py-4 tabular-nums text-ink-700">
+                    <InlineEditableField
+                      value={f.echeance}
+                      onSave={(next) => updateFacture(f.id, { echeance: next })}
+                      className="date-value inline-block text-ink-700"
+                    />
+                  </td>
+                  <td className="px-6 py-4 font-semibold tabular-nums text-ink-900">
+                    <InlineEditableField
+                      value={`${f.montant} €`}
+                      onSave={(next) => updateFacture(f.id, { montant: Number(next.replace(/[^0-9.-]/g, '')) || 0 })}
+                      className="inline-block font-semibold text-ink-900"
+                    />
+                  </td>
                   <td className="px-6 py-4">
-                    <Badge tone={toneForResultat(f.statut)}>{f.statut}</Badge>
+                    <InlineEditableField
+                      value={f.statut}
+                      onSave={(next) => updateFacture(f.id, { statut: next as StatutFacture })}
+                      type="select"
+                      options={['Payée', 'En attente', 'En retard']}
+                      className="inline-block"
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">

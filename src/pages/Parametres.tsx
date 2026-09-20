@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card, CardHeader } from '../components/ui/Card';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 
 const preferences = [
 {
@@ -56,6 +57,38 @@ export function Parametres() {
     Object.fromEntries(preferences.map((p) => [p.id, p.defaut]))
   );
   const [enregistre, setEnregistre] = useState(false);
+  const [pageTitle, setPageTitle] = useState(() => localStorage.getItem('settingsPageTitle') ?? 'Paramètres');
+  const [pageDescription, setPageDescription] = useState(() => localStorage.getItem('settingsPageDescription') ?? 'Établissement, agrément et préférences de notification');
+  const [establishmentTitle, setEstablishmentTitle] = useState(() => localStorage.getItem('settingsEstablishmentTitle') ?? 'Établissement');
+  const [establishmentDescription, setEstablishmentDescription] = useState(() => localStorage.getItem('settingsEstablishmentDescription') ?? 'Informations déclarées auprès de la préfecture');
+  const [notificationTitle, setNotificationTitle] = useState(() => localStorage.getItem('settingsNotificationTitle') ?? 'Notifications');
+  const [notificationDescription, setNotificationDescription] = useState(() => localStorage.getItem('settingsNotificationDescription') ?? 'Alertes envoyées à votre équipe');
+  const [saveLabel, setSaveLabel] = useState(() => localStorage.getItem('settingsSaveLabel') ?? 'Enregistrer les préférences');
+  const [savedText, setSavedText] = useState(() => localStorage.getItem('settingsSavedText') ?? 'Préférences enregistrées.');
+  const [rows, setRows] = useState([
+    { t: 'Raison sociale', v: 'Auto-école SPEED PERMIS' },
+    { t: 'N° d’agrément', v: 'E 21 013 0045 0' },
+    { t: 'SIRET', v: '812 456 998 00027' },
+    { t: 'Adresse', v: '48 avenue de la Capelette, 13010 Marseille' },
+    { t: 'Téléphone', v: '04 91 33 27 84' },
+    { t: 'Responsable pédagogique', v: 'Karim Belhaj' },
+  ]);
+  const [notificationItems, setNotificationItems] = useState(preferences);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('settingsPageTitle', pageTitle);
+      localStorage.setItem('settingsPageDescription', pageDescription);
+      localStorage.setItem('settingsEstablishmentTitle', establishmentTitle);
+      localStorage.setItem('settingsEstablishmentDescription', establishmentDescription);
+      localStorage.setItem('settingsNotificationTitle', notificationTitle);
+      localStorage.setItem('settingsNotificationDescription', notificationDescription);
+      localStorage.setItem('settingsSaveLabel', saveLabel);
+      localStorage.setItem('settingsSavedText', savedText);
+    } catch {
+      // ignore
+    }
+  }, [pageTitle, pageDescription, establishmentTitle, establishmentDescription, notificationTitle, notificationDescription, saveLabel, savedText]);
 
   const handleToggle = (id: string) => {
     setEtats(prev => ({ ...prev, [id]: !prev[id] }));
@@ -69,43 +102,46 @@ export function Parametres() {
 
   return (
     <>
-      <PageHeader title="Paramètres" description="Établissement, agrément et préférences de notification" />
+      <PageHeader
+        title={<InlineEditableField value={pageTitle} onSave={setPageTitle} className="inline-block" />}
+        description={<InlineEditableField value={pageDescription} onSave={setPageDescription} className="inline-block" />}
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Établissement" description="Informations déclarées auprès de la préfecture" />
+          <CardHeader
+            title={<InlineEditableField value={establishmentTitle} onSave={setEstablishmentTitle} className="inline-block" />}
+            description={<InlineEditableField value={establishmentDescription} onSave={setEstablishmentDescription} className="inline-block" />}
+          />
           <dl className="divide-y divide-line">
-            {[
-            { t: 'Raison sociale', v: 'Auto-école SPEED PERMIS' },
-            { t: 'N° d’agrément', v: 'E 21 013 0045 0' },
-            { t: 'SIRET', v: '812 456 998 00027' },
-            { t: 'Adresse', v: '48 avenue de la Capelette, 13010 Marseille' },
-            { t: 'Téléphone', v: '04 91 33 27 84' },
-            { t: 'Responsable pédagogique', v: 'Karim Belhaj' }].
-            map((row) =>
+            {rows.map((row) =>
             <div key={row.t} className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
                 <dt className="text-sm text-ink-500">{row.t}</dt>
-                <dd className="text-sm font-semibold text-ink-900">{row.v}</dd>
+                <dd className="text-sm font-semibold text-ink-900">
+                  <InlineEditableField value={row.v} onSave={(next) => setRows((prev) => prev.map((item) => item.t === row.t ? { ...item, v: next } : item))} className="inline-block" />
+                </dd>
               </div>
             )}
           </dl>
         </Card>
 
         <Card className="flex flex-col">
-          <CardHeader title="Notifications" description="Alertes envoyées à votre équipe" />
+          <CardHeader
+            title={<InlineEditableField value={notificationTitle} onSave={setNotificationTitle} className="inline-block" />}
+            description={<InlineEditableField value={notificationDescription} onSave={setNotificationDescription} className="inline-block" />}
+          />
           <ul className="divide-y divide-line">
-            {preferences.map((p) =>
+            {notificationItems.map((p) =>
             <li key={p.id} className="flex items-start gap-4 px-6 py-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-ink-900">{p.titre}</p>
-                  <p className="mt-0.5 text-sm text-ink-500">{p.detail}</p>
+                  <p className="text-sm font-semibold text-ink-900"><InlineEditableField value={p.titre} onSave={(next) => setNotificationItems((prev) => prev.map((item) => item.id === p.id ? { ...item, titre: next } : item))} className="inline-block" /></p>
+                  <p className="mt-0.5 text-sm text-ink-500"><InlineEditableField value={p.detail} onSave={(next) => setNotificationItems((prev) => prev.map((item) => item.id === p.id ? { ...item, detail: next } : item))} className="inline-block" /></p>
                 </div>
                 <Toggle
                 id={p.id}
                 label={p.titre}
                 checked={etats[p.id]}
                 onChange={() => handleToggle(p.id)} />
-              
               </li>
             )}
           </ul>
@@ -115,11 +151,11 @@ export function Parametres() {
               onClick={handleSave}
               className="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-brand-700">
               
-              Enregistrer les préférences
+              <InlineEditableField value={saveLabel} onSave={setSaveLabel} className="inline-block text-sm font-semibold text-white" />
             </button>
             {enregistre &&
             <p role="status" className="text-sm font-medium text-ok-600">
-                Préférences enregistrées.
+                <InlineEditableField value={savedText} onSave={setSavedText} className="inline-block" />
               </p>
             }
           </div>

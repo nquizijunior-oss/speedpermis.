@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BellIcon, MenuIcon, SearchIcon, UserRoundIcon } from 'lucide-react';
 import { candidats } from '../../data/candidats';
 import { useAppContext } from '../../hooks/useAppContext';
+import { InlineEditableField } from '../ui/InlineEditableField';
 
 interface TopbarProps {
   onOpenMenu: () => void;
@@ -13,8 +14,23 @@ interface TopbarProps {
 export function Topbar({ onOpenMenu, unread }: TopbarProps) {
   const [query, setQuery] = useState('');
   const [openNotif, setOpenNotif] = useState(false);
+  const [schoolName, setSchoolName] = useState(() => {
+    try {
+      return localStorage.getItem('schoolName') ?? 'Auto-école SPEED PERMIS';
+    } catch {
+      return 'Auto-école SPEED PERMIS';
+    }
+  });
   const navigate = useNavigate();
   const { messages, updateMessage } = useAppContext();
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('schoolName', schoolName);
+    } catch {
+      // ignore
+    }
+  }, [schoolName]);
 
   const notifications = messages
     .slice(0, 3)
@@ -146,7 +162,14 @@ export function Topbar({ onOpenMenu, unread }: TopbarProps) {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <span className="hidden text-sm font-medium text-ink-800 md:block">Auto-école SPEED PERMIS</span>
+          <span className="hidden text-sm font-medium text-ink-800 md:block">
+            <InlineEditableField
+              value={schoolName}
+              onSave={setSchoolName}
+              className="w-auto truncate text-sm font-medium text-ink-900"
+              placeholder="Nom de l'auto-école"
+            />
+          </span>
           <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-600 text-white">
             <UserRoundIcon className="h-[18px] w-[18px]" aria-hidden="true" />
           </span>

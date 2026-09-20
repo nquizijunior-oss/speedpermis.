@@ -12,8 +12,8 @@ export function Card({ children, className = '' }: CardProps) {
 }
 
 interface CardHeaderProps {
-  title: string;
-  description?: string;
+  title: React.ReactNode;
+  description?: React.ReactNode;
   action?: React.ReactNode;
 }
 

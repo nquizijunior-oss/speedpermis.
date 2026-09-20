@@ -5,6 +5,7 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { Card } from '../components/ui/Card';
 import { ResultBadge } from '../components/ui/ResultBadge';
 import { ReserveExamModal } from '../components/modals/ReserveExamModal';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 import { ResultatExamen } from '../types';
 import { useAppContext } from '../hooks/useAppContext';
 
@@ -13,7 +14,7 @@ const filtres: Array<ResultatExamen | 'Tous' | 'Éliminatoire'> = ['Tous', 'En a
 export function Examens() {
   const [filtre, setFiltre] = useState<ResultatExamen | 'Tous' | 'Éliminatoire'>('Tous');
   const [modalOpen, setModalOpen] = useState(false);
-  const { examens } = useAppContext();
+  const { examens, updateExamen } = useAppContext();
 
   const liste = useMemo(
     () => (filtre === 'Tous' ? examens : examens.filter((e) => (filtre === 'Éliminatoire' ? e.resultat === 'Défavorable' : e.resultat === filtre))),
@@ -87,8 +88,16 @@ export function Examens() {
                   </td>
                   <td className="px-6 py-4 text-ink-700">{e.type}</td>
                   <td className="px-6 py-4 tabular-nums text-ink-700">
-                    <span className="date-value">{e.date}</span>
-                    <span className="block text-xs text-ink-400">{e.heure}</span>
+                    <InlineEditableField
+                      value={e.date}
+                      onSave={(nextDate) => updateExamen(e.id, { date: nextDate })}
+                      className="block text-inherit"
+                    />
+                    <InlineEditableField
+                      value={e.heure}
+                      onSave={(nextHeure) => updateExamen(e.id, { heure: nextHeure })}
+                      className="mt-1 block text-xs text-ink-400"
+                    />
                   </td>
                   <td className="px-6 py-4 text-ink-700">{e.centre}</td>
                   <td className="px-6 py-4 tabular-nums text-ink-700">

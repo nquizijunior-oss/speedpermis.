@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { getExamen } from '../data/examens';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 
 const confettis = [
   { left: '5%', top: '20%', color: '#1a46c2', rotate: -22, delay: 0.05, size: 'h-3 w-1.5' },
@@ -58,13 +60,36 @@ function downloadCepc(examen: NonNullable<ReturnType<typeof getExamen>>) {
 export function ExamenSucces() {
   const { id = '' } = useParams();
   const examen = getExamen(id);
+  const [notFoundTitle, setNotFoundTitle] = useState(() => localStorage.getItem('successNotFoundTitle') ?? 'Dossier introuvable');
+  const [backLabel, setBackLabel] = useState(() => localStorage.getItem('successBackLabel') ?? 'Retour aux examens');
+  const [resultLabel, setResultLabel] = useState(() => localStorage.getItem('successResultLabel') ?? 'Résultat favorable');
+  const [successTitle, setSuccessTitle] = useState(() => localStorage.getItem('successMainTitle') ?? 'Permis obtenu !');
+  const [successText, setSuccessText] = useState(() => localStorage.getItem('successText') ?? 'Félicitations ! Le résultat de l’examen pratique de');
+  const [downloadLabel, setDownloadLabel] = useState(() => localStorage.getItem('successDownloadLabel') ?? 'Télécharger le CEPC');
+  const [shareLabel, setShareLabel] = useState(() => localStorage.getItem('successShareLabel') ?? 'Partager la réussite');
+  const [returnLabel, setReturnLabel] = useState(() => localStorage.getItem('successReturnLabel') ?? 'Retour au dossier du candidat');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('successNotFoundTitle', notFoundTitle);
+      localStorage.setItem('successBackLabel', backLabel);
+      localStorage.setItem('successResultLabel', resultLabel);
+      localStorage.setItem('successMainTitle', successTitle);
+      localStorage.setItem('successText', successText);
+      localStorage.setItem('successDownloadLabel', downloadLabel);
+      localStorage.setItem('successShareLabel', shareLabel);
+      localStorage.setItem('successReturnLabel', returnLabel);
+    } catch {
+      // ignore
+    }
+  }, [notFoundTitle, backLabel, resultLabel, successTitle, successText, downloadLabel, shareLabel, returnLabel]);
 
   if (!examen) {
     return (
       <Card className="px-6 py-20 text-center">
-        <h1 className="text-lg font-semibold text-ink-900">Dossier introuvable</h1>
+        <h1 className="text-lg font-semibold text-ink-900"><InlineEditableField value={notFoundTitle} onSave={setNotFoundTitle} className="inline-block" /></h1>
         <Link to="/examens" className="mt-3 inline-block text-sm font-semibold text-brand-600">
-          Retour aux examens
+          <InlineEditableField value={backLabel} onSave={setBackLabel} className="inline-block" />
         </Link>
       </Card>
     );
@@ -128,10 +153,10 @@ export function ExamenSucces() {
             </motion.span>
           </div>
 
-          <p className="mt-7 text-sm font-bold uppercase tracking-[0.18em] text-[#1b6736]">Résultat favorable</p>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-[#1b6736] sm:text-5xl">Permis obtenu !</h1>
+          <p className="mt-7 text-sm font-bold uppercase tracking-[0.18em] text-[#1b6736]"><InlineEditableField value={resultLabel} onSave={setResultLabel} className="inline-block" /></p>
+          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-[#1b6736] sm:text-5xl"><InlineEditableField value={successTitle} onSave={setSuccessTitle} className="inline-block" /></h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-800">
-            Félicitations ! Le résultat de l’examen pratique de <span className="font-semibold">{examen.candidat}</span> est{' '}
+            <InlineEditableField value={successText} onSave={setSuccessText} className="inline-block" /> <span className="font-semibold">{examen.candidat}</span> est{' '}
             <span className="font-bold text-[#1b6736]">favorable</span>.
             <br />
             Le certificat d’examen du permis de conduire (CEPC) a été généré avec succès.
@@ -163,7 +188,7 @@ export function ExamenSucces() {
               className="flex h-12 w-full items-center justify-center gap-2.5 rounded-lg bg-brand-700 text-sm font-semibold text-white transition-colors duration-150 hover:bg-brand-600"
             >
               <DownloadIcon className="h-4 w-4" aria-hidden="true" />
-              Télécharger le CEPC
+              <InlineEditableField value={downloadLabel} onSave={setDownloadLabel} className="inline-block" />
             </button>
             <button
               type="button"
@@ -175,7 +200,7 @@ export function ExamenSucces() {
               className="flex h-12 w-full items-center justify-center gap-2.5 rounded-lg border border-line bg-white text-sm font-semibold text-ink-800 transition-colors duration-150 hover:bg-canvas"
             >
               <Share2Icon className="h-4 w-4" aria-hidden="true" />
-              Partager la réussite
+              <InlineEditableField value={shareLabel} onSave={setShareLabel} className="inline-block" />
             </button>
           </div>
 
@@ -183,7 +208,7 @@ export function ExamenSucces() {
             to={`/candidats/${examen.candidatId}`}
             className="mt-7 inline-block text-sm font-semibold text-brand-600 transition-colors duration-150 hover:text-brand-700"
           >
-            Retour au dossier du candidat
+            <InlineEditableField value={returnLabel} onSave={setReturnLabel} className="inline-block" />
           </Link>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ChevronDownIcon,
   MenuIcon,
@@ -8,6 +8,7 @@ import {
 'lucide-react';
 import { MarianneLogo } from './MarianneLogo';
 import { primaryNav, secondaryNav, NavItem } from '../first-site-data/navigation';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 
 function NavButton({ item }: {item: NavItem;}) {
   const [open, setOpen] = useState(false);
@@ -50,6 +51,22 @@ function NavButton({ item }: {item: NavItem;}) {
 
 export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [brandText, setBrandText] = useState(() => {
+    try {
+      return localStorage.getItem('siteBrandText') ?? 'SÉCURITÉ ROUTIÈRE VIVRE, ENSEMBLE';
+    } catch {
+      return 'SÉCURITÉ ROUTIÈRE VIVRE, ENSEMBLE';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('siteBrandText', brandText);
+    } catch {
+      // ignore
+    }
+  }, [brandText]);
+
   const allNav = [...primaryNav, ...secondaryNav];
 
   return (
@@ -61,11 +78,7 @@ export function SiteHeader() {
           <span aria-hidden="true" className="hidden font-display text-[17px] font-bold leading-[1.05] tracking-tight text-ink sm:block">
             <span className="block">SÉCURITÉ</span>
             <span className="block">
-              ROUTIÈRE{' '}
-              <span className="bg-gov-yellow px-1">
-                VIVRE,
-                <span className="block">ENSEMBLE</span>
-              </span>
+              <InlineEditableField value={brandText} onSave={setBrandText} className="inline-block" inputClassName="min-w-[220px]" />
             </span>
           </span>
         </a>

@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { PlusIcon } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
 import { CategoryBadge } from '../components/ui/CategoryBadge';
-import { toneForResultat } from '../components/ui/badgeTone';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 import { NewReservationModal } from '../components/modals/NewReservationModal';
 import { creneaux, datesSemaine, joursSemaine } from '../data/reservations';
 import { moniteurs } from '../data/moniteurs';
 import { useAppContext } from '../hooks/useAppContext';
+import type { Reservation } from '../types';
 
 const typeStyles: Record<string, string> = {
   'Leçon de conduite': 'border-brand-600 bg-brand-50 text-brand-700',
@@ -109,12 +109,27 @@ export function Reservations() {
                           style={{ top: start * 64 + 4, height: span * 64 - 8 }}
                         >
                           <div className="flex items-center gap-2">
-                            <p className="truncate text-xs font-semibold">{r.candidat}</p>
+                            <p className="truncate text-xs font-semibold">
+                              <InlineEditableField value={r.candidat} onSave={(next) => updateReservation(r.id, { candidat: next })} className="inline-block text-xs font-semibold" />
+                            </p>
                             {r.categorie && <CategoryBadge category={r.categorie} />}
                           </div>
-                          <p className="truncate text-[11px] opacity-80">{r.type}</p>
+                          <p className="truncate text-[11px] opacity-80">
+                            <InlineEditableField value={r.type} onSave={(next) => updateReservation(r.id, { type: next as Reservation['type'] })} type="select" options={['Leçon de conduite', 'Conduite accompagnée', 'Examen blanc', 'Cours de code']} className="inline-block text-[11px] opacity-80" />
+                          </p>
                           <p className="truncate text-[11px] opacity-70">
-                            {r.debut}–{r.fin} · {r.vehicule}
+                            <InlineEditableField
+                              value={r.debut}
+                              onSave={(nextDebut) => updateReservation(r.id, { debut: nextDebut })}
+                              className="inline-block text-[11px] opacity-70"
+                            />
+                            –
+                            <InlineEditableField
+                              value={r.fin}
+                              onSave={(nextFin) => updateReservation(r.id, { fin: nextFin })}
+                              className="inline-block text-[11px] opacity-70"
+                            />
+                            · <InlineEditableField value={r.vehicule} onSave={(next) => updateReservation(r.id, { vehicule: next })} className="inline-block text-[11px] opacity-70" />
                           </p>
                         </article>
                       );
@@ -136,21 +151,22 @@ export function Reservations() {
               <li key={r.id} className="flex flex-wrap items-center gap-3 px-6 py-4">
                 <div className="min-w-[180px] flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-ink-900">{r.candidat}</p>
+                    <p className="text-sm font-semibold text-ink-900">
+                      <InlineEditableField value={r.candidat} onSave={(next) => updateReservation(r.id, { candidat: next })} className="inline-block text-sm font-semibold text-ink-900" />
+                    </p>
                     {r.categorie && <CategoryBadge category={r.categorie} />}
                   </div>
                   <p className="text-xs text-ink-500">
-                    {joursSemaine[r.jour]} {r.debut}–{r.fin} · {r.moniteur}
+                    {joursSemaine[r.jour]} <InlineEditableField value={r.debut} onSave={(nextDebut) => updateReservation(r.id, { debut: nextDebut })} className="inline-block text-xs text-ink-500" />–<InlineEditableField value={r.fin} onSave={(nextFin) => updateReservation(r.id, { fin: nextFin })} className="inline-block text-xs text-ink-500" /> · <InlineEditableField value={r.moniteur} onSave={(next) => updateReservation(r.id, { moniteur: next })} className="inline-block text-xs text-ink-500" />
                   </p>
                 </div>
-                <Badge tone={toneForResultat(r.statut)}>{r.statut}</Badge>
-                <button
-                  type="button"
-                  onClick={() => updateReservation(r.id, { statut: 'Confirmée' })}
-                  className="rounded-lg bg-brand-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-brand-700"
-                >
-                  Confirmer
-                </button>
+                <InlineEditableField
+                  value={r.statut}
+                  onSave={(next) => updateReservation(r.id, { statut: next as Reservation['statut'] })}
+                  type="select"
+                  options={['Confirmée', 'À confirmer', 'Annulée']}
+                  className="inline-block"
+                />
               </li>
             ))}
           </ul>
@@ -168,21 +184,22 @@ export function Reservations() {
                 <li key={r.id} className="flex flex-wrap items-center gap-3 px-6 py-4">
                   <div className="min-w-[180px] flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-ink-900">{r.candidat}</p>
+                      <p className="text-sm font-semibold text-ink-900">
+                        <InlineEditableField value={r.candidat} onSave={(next) => updateReservation(r.id, { candidat: next })} className="inline-block text-sm font-semibold text-ink-900" />
+                      </p>
                       {r.categorie && <CategoryBadge category={r.categorie} />}
                     </div>
                     <p className="text-xs text-ink-500">
-                      {joursSemaine[r.jour]} {r.debut}–{r.fin} · {r.moniteur}
+                      {joursSemaine[r.jour]} <InlineEditableField value={r.debut} onSave={(nextDebut) => updateReservation(r.id, { debut: nextDebut })} className="inline-block text-xs text-ink-500" />–<InlineEditableField value={r.fin} onSave={(nextFin) => updateReservation(r.id, { fin: nextFin })} className="inline-block text-xs text-ink-500" /> · <InlineEditableField value={r.moniteur} onSave={(next) => updateReservation(r.id, { moniteur: next })} className="inline-block text-xs text-ink-500" />
                     </p>
                   </div>
-                  <Badge tone="danger">Annulée</Badge>
-                  <button
-                    type="button"
-                    onClick={() => updateReservation(r.id, { statut: 'À confirmer' })}
-                    className="rounded-lg border border-line px-3.5 py-2 text-xs font-semibold text-ink-800 transition-colors duration-150 hover:bg-canvas"
-                  >
-                    Reprogrammer
-                  </button>
+                  <InlineEditableField
+                    value={r.statut}
+                    onSave={(next) => updateReservation(r.id, { statut: next as Reservation['statut'] })}
+                    type="select"
+                    options={['Confirmée', 'À confirmer', 'Annulée']}
+                    className="inline-block"
+                  />
                 </li>
               ))}
             </ul>

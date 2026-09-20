@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { DownloadIcon, FileTextIcon, UploadIcon } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { toneForResultat } from '../components/ui/badgeTone';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 import { StatutDocument } from '../types';
 import { useAppContext } from '../hooks/useAppContext';
 
@@ -81,12 +80,24 @@ export function Documents() {
                 <FileTextIcon className="h-5 w-5" aria-hidden="true" />
               </span>
               <div className="min-w-[240px] flex-1">
-                <p className="text-sm font-semibold text-ink-900">{d.nom}</p>
+                <p className="text-sm font-semibold text-ink-900">
+                  <InlineEditableField value={d.nom} onSave={(next) => updateDocument(d.id, { nom: next })} className="inline-block text-sm font-semibold text-ink-900" />
+                </p>
                 <p className="mt-0.5 text-xs text-ink-500">
-                  {d.type} · {d.candidat} · {d.taille} · déposé le <span className="date-value">{d.dateDepot}</span>
+                  <InlineEditableField value={d.type} onSave={(next) => updateDocument(d.id, { type: next })} className="inline-block text-xs text-ink-500" />
+                  {' · '}
+                  <InlineEditableField value={d.candidat} onSave={(next) => updateDocument(d.id, { candidat: next })} className="inline-block text-xs text-ink-500" />
+                  {' · '}
+                  {d.taille} · déposé le <InlineEditableField value={d.dateDepot} onSave={(next) => updateDocument(d.id, { dateDepot: next })} className="date-value inline-block text-xs text-ink-500" />
                 </p>
               </div>
-              <Badge tone={toneForResultat(d.statut)}>{d.statut}</Badge>
+              <InlineEditableField
+                value={d.statut}
+                onSave={(next) => updateDocument(d.id, { statut: next as StatutDocument })}
+                type="select"
+                options={['À vérifier', 'Validé', 'Refusé']}
+                className="inline-block"
+              />
               {d.statut === 'À vérifier' && (
                 <button
                   type="button"

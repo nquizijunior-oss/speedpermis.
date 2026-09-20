@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CheckIcon, Loader2Icon } from 'lucide-react';
 import { MarianneLogo } from '../first-site-components/MarianneLogo';
+import { InlineEditableField } from '../components/ui/InlineEditableField';
 
 type Status = 'idle' | 'pending';
 
@@ -11,12 +12,35 @@ export function Connexion() {
   const [remember, setRemember] = useState(false);
   const [status, setStatus] = useState<Status>('idle');
   const [captchaLoaded, setCaptchaLoaded] = useState(false);
+  const [pageTitle, setPageTitle] = useState(() => localStorage.getItem('firstLoginTitle') ?? 'Bienvenue sur RdvPermis');
+  const [loginTitle, setLoginTitle] = useState(() => localStorage.getItem('firstLoginHeading') ?? 'J’ai un compte, je me connecte');
+  const [emailLabel, setEmailLabel] = useState(() => localStorage.getItem('firstLoginEmailLabel') ?? 'ADRESSE E-MAIL');
+  const [passwordLabel, setPasswordLabel] = useState(() => localStorage.getItem('firstLoginPasswordLabel') ?? 'MOT DE PASSE');
+  const [rememberLabel, setRememberLabel] = useState(() => localStorage.getItem('firstLoginRememberLabel') ?? 'Se souvenir de moi');
+  const [loadingLabel, setLoadingLabel] = useState(() => localStorage.getItem('firstLoginLoadingLabel') ?? 'Chargement de la vérification...');
+  const [successLabel, setSuccessLabel] = useState(() => localStorage.getItem('firstLoginSuccessLabel') ?? 'Success!');
+  const [connectLabel, setConnectLabel] = useState(() => localStorage.getItem('firstLoginConnectLabel') ?? 'JE ME CONNECTE');
   const navigate = useNavigate();
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => setCaptchaLoaded(true), 700);
     return () => window.clearTimeout(timeoutId);
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('firstLoginTitle', pageTitle);
+      localStorage.setItem('firstLoginHeading', loginTitle);
+      localStorage.setItem('firstLoginEmailLabel', emailLabel);
+      localStorage.setItem('firstLoginPasswordLabel', passwordLabel);
+      localStorage.setItem('firstLoginRememberLabel', rememberLabel);
+      localStorage.setItem('firstLoginLoadingLabel', loadingLabel);
+      localStorage.setItem('firstLoginSuccessLabel', successLabel);
+      localStorage.setItem('firstLoginConnectLabel', connectLabel);
+    } catch {
+      // ignore
+    }
+  }, [pageTitle, loginTitle, emailLabel, passwordLabel, rememberLabel, loadingLabel, successLabel, connectLabel]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -49,12 +73,12 @@ export function Connexion() {
 
       <main className="w-full px-5 pb-24">
         <h1 className="mt-6 text-center font-display text-[26px] font-semibold text-[#12326b] sm:text-[28px]">
-          Bienvenue sur RdvPermis
+          <InlineEditableField value={pageTitle} onSave={setPageTitle} className="inline-block" />
         </h1>
 
         <section className="mx-auto mt-10 w-full max-w-2xl rounded-lg border border-neutral-200 bg-white px-8 py-10 shadow-sm sm:px-14">
           <h2 className="text-center font-display text-[22px] font-semibold text-[#12326b]">
-            J’ai un compte, je me connecte
+            <InlineEditableField value={loginTitle} onSave={setLoginTitle} className="inline-block" />
           </h2>
 
           <form className="mt-10" onSubmit={handleSubmit}>
@@ -62,7 +86,7 @@ export function Connexion() {
               htmlFor="email"
               className="block font-display text-[13px] font-bold tracking-wide text-[#3a5a86]">
               
-              ADRESSE E-MAIL{' '}
+              <InlineEditableField value={emailLabel} onSave={setEmailLabel} className="inline-block" />{' '}
               <span className="ml-2 font-sans text-[14px] font-normal tracking-normal text-muted">
                 (nom@exemple.com)
               </span>
@@ -82,7 +106,7 @@ export function Connexion() {
               htmlFor="password"
               className="mt-6 block font-display text-[13px] font-bold tracking-wide text-[#3a5a86]">
               
-              MOT DE PASSE
+              <InlineEditableField value={passwordLabel} onSave={setPasswordLabel} className="inline-block" />
             </label>
             <input
               id="password"
@@ -102,7 +126,7 @@ export function Connexion() {
                 onChange={(event) => setRemember(event.target.checked)}
                 className="h-4 w-4 rounded-sm border-neutral-400 text-gov-blue focus:ring-gov-blue" />
               
-              Se souvenir de moi
+              <InlineEditableField value={rememberLabel} onSave={setRememberLabel} className="inline-block" />
             </label>
 
             <div
@@ -113,11 +137,11 @@ export function Connexion() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1c9c4b]">
                   <CheckIcon className="h-5 w-5 text-white" strokeWidth={3} aria-hidden="true" />
                 </span>
-                <span className="text-[16px] text-ink">Success!</span>
+                <span className="text-[16px] text-ink"><InlineEditableField value={successLabel} onSave={setSuccessLabel} className="inline-block" /></span>
               </> :
               <>
                 <Loader2Icon className="h-5 w-5 animate-spin text-gov-blue" aria-hidden="true" />
-                <span className="text-[16px] text-ink">Chargement de la vérification...</span>
+                <span className="text-[16px] text-ink"><InlineEditableField value={loadingLabel} onSave={setLoadingLabel} className="inline-block" /></span>
               </>}
             </div>
 
@@ -130,7 +154,7 @@ export function Connexion() {
                 {status === 'pending' &&
                 <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden="true" />
                 }
-                JE ME CONNECTE
+                <InlineEditableField value={connectLabel} onSave={setConnectLabel} className="inline-block" />
               </button>
             </div>
           </form>
